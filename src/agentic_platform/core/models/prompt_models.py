@@ -1,7 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import Dict, Any
-
-from pydantic import BaseModel, Field
+from typing import Dict, Any, List, Optional
 
 HAIKU_MODEL_ID = "us.anthropic.claude-3-haiku-20240307-v1:0"
 class BasePrompt(BaseModel):
@@ -37,4 +35,16 @@ class BasePrompt(BaseModel):
             raise KeyError(f'Missing input value: {e}')
         except Exception as e:
             raise Exception(f'Error formatting prompt: {e}')
-    
+
+    def to_bedrock_messages(self, conversation: Optional[List[Dict[str, Any]]] = None) -> List[Dict[str, Any]]:
+        """Convert to Bedrock messages format."""
+        messages = conversation.copy() if conversation else []
+        messages.append({"role": "user", "content": [{"text": self.user_prompt}]})
+        return messages
+
+    def to_bedrock_system(self, guard_content: Optional[Dict[str, Any]] = None) -> List[Dict[str, Any]]:
+        """Convert to Bedrock system format."""
+        system = [{"text": self.system_prompt}]
+        if guard_content:
+            system.append({"guard": guard_content})
+        return system

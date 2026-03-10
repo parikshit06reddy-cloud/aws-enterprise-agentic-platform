@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//home/mjramani/projects/ap-fresh/**)"
+    ],
+    "additionalDirectories": [
+      "/home/mjramani/projects/ap-fresh/.venv"
+    ]
+  }
+}

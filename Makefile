@@ -21,6 +21,8 @@ help:
 	@echo "  make security             Run gitleaks"
 	@echo ""
 	@echo "Run Locally:"
+	@echo "  make dev:deps                      Start local dependencies (Postgres, Redis, LiteLLM, etc.)"
+	@echo "  make dev:deps-stop                 Stop local dependencies"
 	@echo "  make dev <name> [PORT=<port>]      Run agent or MCP server locally"
 	@echo "  make service <name>                Run a gateway service locally"
 	@echo ""
@@ -63,6 +65,14 @@ security:
 #==============================================================================
 # Run Locally
 #==============================================================================
+
+# make dev:deps
+dev\:deps:
+	docker compose up -d
+
+# make dev:deps-stop
+dev\:deps-stop:
+	docker compose down
 
 # make dev agentic_chat
 dev:

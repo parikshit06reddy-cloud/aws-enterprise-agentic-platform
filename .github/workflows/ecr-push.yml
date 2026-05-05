@@ -1,22 +1,18 @@
 name: Build and Push Services
 
-# Workflow is currently disabled - uncomment 'on:' section below to re-enable
 on:
-  workflow_dispatch: # This allows manual triggering only, but won't auto-trigger
-
-# on:
-#   push:
-#     branches: [ main, develop ]
-#     tags: [ 'v*' ]
-#   pull_request:
-#     branches: [ main ]
-#   workflow_dispatch:
-#     inputs:
-#       services:
-#         description: 'Services to build (comma-separated, or "all")'
-#         required: false
-#         default: 'changed'
-#         type: string
+  push:
+    branches: [main, develop]
+    tags: ['v*']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      services:
+        description: 'Services to build (comma-separated, or "all")'
+        required: false
+        default: 'changed'
+        type: string
 
 env:
   AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
@@ -232,10 +228,31 @@ jobs:
         aws-region: ${{ env.AWS_REGION }}
 
     - name: Build and push ${{ matrix.service }}
+      id: build
+      env:
+        # Use the commit SHA as the immutable tag so deployments are traceable.
+        IMAGE_TAG: ${{ github.sha }}
       run: |
-        # Make script executable and run it
         chmod +x ./deploy/build-container.sh
         ./deploy/build-container.sh "${{ matrix.service }}"
+
+    - name: Trivy scan published image
+      if: success()
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: ${{ steps.build.outputs.image_uri }}
+        format: sarif
+        output: trivy-image-${{ matrix.service }}.sarif
+        severity: CRITICAL,HIGH
+        ignore-unfixed: true
+      continue-on-error: true
+
+    - name: Upload Trivy SARIF
+      if: always() && steps.build.outputs.image_uri != ''
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: trivy-image-${{ matrix.service }}.sarif
+        category: trivy-image-${{ matrix.service }}
 
   summary:
     name: Build Summary

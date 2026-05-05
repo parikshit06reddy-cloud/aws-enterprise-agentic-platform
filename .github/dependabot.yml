@@ -1,0 +1,68 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - github-actions
+
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 10
+    labels:
+      - dependencies
+      - python
+    versioning-strategy: increase-if-necessary
+    groups:
+      langchain:
+        patterns:
+          - "langchain*"
+          - "langgraph*"
+          - "langchain-*"
+      aws-sdk:
+        patterns:
+          - "boto3*"
+          - "botocore*"
+          - "aws-*"
+      observability:
+        patterns:
+          - "opentelemetry*"
+          - "langsmith*"
+      pydantic-ai:
+        patterns:
+          - "pydantic*"
+          - "pydantic-ai*"
+          - "pydantic-graph*"
+      strands-agents:
+        patterns:
+          - "strands-agents*"
+          - "bedrock-agentcore*"
+      sec-tools:
+        patterns:
+          - "ruff*"
+          - "mypy*"
+          - "bandit*"
+          - "pip-audit*"
+          - "pytest*"
+
+  - package-ecosystem: terraform
+    directory: /infrastructure
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    labels:
+      - dependencies
+      - terraform
+
+  - package-ecosystem: docker
+    directory: /docker
+    schedule:
+      interval: weekly
+    labels:
+      - dependencies
+      - docker
